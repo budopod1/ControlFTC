@@ -64,7 +64,7 @@
 </script>
 
 <Modal title="Choose a button" bind:openModal bind:closeModal>
-    <object data="/ftcgamepad.svg" type="image/svg+xml" onload={diagramLoaded}
+    <object data="ftcgamepad.svg" type="image/svg+xml" onload={diagramLoaded}
         aria-label="FTC Gamepad" class="gamepad-diagram"></object>
 
     {#snippet footer()}

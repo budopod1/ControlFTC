@@ -61,10 +61,10 @@
 </script>
 
 <Modal title="Choose an axis" bind:openModal bind:closeModal>
-    <object data="/gamepadtriggers.svg" type="image/svg+xml"
+    <object data="gamepadtriggers.svg" type="image/svg+xml"
         onload={triggerDiagramLoaded} aria-label="FTC Gamepad Triggers"
         class="gamepad-diagram"></object>
-    <object data="/ftcgamepad.svg" type="image/svg+xml" onload={mainDiagramLoaded}
+    <object data="ftcgamepad.svg" type="image/svg+xml" onload={mainDiagramLoaded}
         aria-label="FTC Gamepad" class="gamepad-diagram"></object>
     
     {#if selectedJoystick != null}
