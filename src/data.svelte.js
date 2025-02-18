@@ -359,7 +359,7 @@ export const NODE_TYPES = [
             }
         ],
         inputs: [
-            {id: "operand", type: DataType.Bool, repeatCount: "operandCount"}
+            {id: "operand", type: DataType.Bool, repeatSource: "operandCount"}
         ],
         output: {type: DataType.Bool}
     },
@@ -381,7 +381,7 @@ export const NODE_TYPES = [
             {id: "ifFalse", typeSource: "type", label: "false"}
         ],
         output: {typeSource: "type"}
-    },,
+    },
     {
         category: "Boolean",
         name: "Value or 0",
@@ -389,7 +389,7 @@ export const NODE_TYPES = [
             {id: "condition", type: DataType.Bool, label: "cond"},
             {id: "value", type: DataType.Real, label: "val"}
         ],
-        output: {typeSource: "type"}
+        output: {type: DataType.Real}
     },
     {
         category: "Boolean",
