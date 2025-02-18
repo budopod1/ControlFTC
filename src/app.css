@@ -1,0 +1,99 @@
+* {
+    box-sizing: border-box;
+}
+
+input, button, textarea, select {
+    font: inherit;
+    color: inherit;
+}
+
+button {
+    cursor: pointer;
+    background-color: transparent;
+    border: none;
+}
+
+body, h1, h2, h3, h4, h5, h6 {
+    margin: 0;
+}
+
+h1 {
+    font-size: 1.4rem;
+    text-shadow: 2px 2px 4px var(--active-color);
+}
+
+h2 {
+    font-size: 1.2rem;
+}
+
+:root {
+    --background-color: #0e0e0e;
+    --focus-background-color: #1b1b1b;
+    --active-text-color: #e5e5e5;
+    --passive-text-color: #7c7c7c;
+    --primary-color: #384a37;
+    --active-color: #83af84;
+    --border-size: 1px;
+    --border-color: #3d3d3d;
+    --container-padding: 0.3rem;
+    --modal-padding: 1rem;
+    --btn-padding: 0.2rem 0.4rem;
+    --collapsible-indent: 1.2rem;
+}
+
+#app {
+    background-color: var(--background-color);
+    color: var(--active-text-color);
+
+    font-family: "Orbitron", serif;
+    font-optical-sizing: auto;
+    font-weight: 400;
+    font-style: normal;
+}
+
+.center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
+
+select {
+    background-color: transparent;
+    border: none;
+}
+
+input:disabled {
+    pointer-events: none;
+}
+
+.name-row {
+    display: flex;
+    align-items: center;
+}
+
+.name-row input {
+    border: solid var(--border-size) transparent;
+    background-color: transparent;
+    width: 100%;
+    flex-grow: 1;
+}
+
+.selected-name-row {
+    background-color: var(--focus-background-color);
+}
+
+.name-row input:focus {
+    outline: none;
+    border: solid var(--border-size) var(--border-color);
+}
+
+.btn {
+    background-color: var(--primary-color);
+    border: none;
+    padding: var(--btn-padding);
+}
+
+.btn:active {
+    background-color: var(--active-color);
+}
