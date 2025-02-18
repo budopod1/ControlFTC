@@ -359,7 +359,7 @@ export const NODE_TYPES = [
             }
         ],
         inputs: [
-            {id: "operand", type: DataType.Bool, repeatSource: "operandCount"}
+            {id: "operand", type: DataType.Bool, repeatsSource: "operandCount"}
         ],
         output: {type: DataType.Bool}
     },
