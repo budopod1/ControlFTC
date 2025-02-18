@@ -349,11 +349,17 @@ export const NODE_TYPES = [
                 type: "select",
                 options: ["and", "or", "xor"],
                 value: "or"
+            },
+            {
+                id: "operandCount",
+                name: "Operand #",
+                type: "input",
+                inputType: "number",
+                value: 2
             }
         ],
         inputs: [
-            {id: "a", type: DataType.Bool},
-            {id: "b", type: DataType.Bool}
+            {id: "operand", type: DataType.Bool, repeatCount: "operandCount"}
         ],
         output: {type: DataType.Bool}
     },
@@ -373,6 +379,15 @@ export const NODE_TYPES = [
             {id: "condition", type: DataType.Bool, label: "cond"},
             {id: "ifTrue", typeSource: "type", label: "true"},
             {id: "ifFalse", typeSource: "type", label: "false"}
+        ],
+        output: {typeSource: "type"}
+    },,
+    {
+        category: "Boolean",
+        name: "Value or 0",
+        inputs: [
+            {id: "condition", type: DataType.Bool, label: "cond"},
+            {id: "value", type: DataType.Real, label: "val"}
         ],
         output: {typeSource: "type"}
     },
