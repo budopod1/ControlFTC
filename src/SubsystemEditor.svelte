@@ -308,7 +308,7 @@
         position: absolute;
         inset: 0;
         image-rendering: crisp-edges;
-        background-image: url("./grid.png");
+        background-image: url("/grid.png");
         background-position:
             calc(var(--pan-x) * var(--zoom-multiple))
             calc(var(--pan-y) * var(--zoom-multiple));
