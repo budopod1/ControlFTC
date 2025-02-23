@@ -89,5 +89,6 @@
     .dialog-footer {
         display: flex;
         justify-content: end;
+        gap: var(--container-padding);
     }
 </style>

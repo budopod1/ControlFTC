@@ -5,22 +5,17 @@
     import Editor from "./Editor.svelte";
     import Inspector from "./Inspector.svelte";
     import Footer from "./Footer.svelte";
+    import ManageOpmodesModal from "./ManageOpmodesModal.svelte";
     import NewFileModal from "./NewFileModal.svelte";
     import ChooseButtonModal from "./ChooseButtonModal.svelte";
     import ChooseAxisModal from "./ChooseAxisModal.svelte";
 
-    import { state_, actions } from "./data.svelte.js";
+    import { state_, actions, saveState } from "./data.svelte.js";
 
     actions.deleteFile = (id) => {
         state_.opmode.files = state_.opmode.files.filter(
             file => file.id != id);
     };
-
-    function saveState() {
-        localStorage.setItem("state", JSON.stringify({
-            opmode: state_.opmode.toJSON()
-        }));
-    }
 
     const SAVE_TIMEOUT = 2 * 1000;
 
@@ -50,6 +45,7 @@
     <Footer/>
 </footer>
 
+<ManageOpmodesModal/>
 <NewFileModal/>
 <ChooseButtonModal/>
 <ChooseAxisModal/>

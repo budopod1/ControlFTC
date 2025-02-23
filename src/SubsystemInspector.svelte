@@ -2,7 +2,8 @@
     import Collapsible from "./Collapsible.svelte";
     import VisualNode from "./VisualNode.svelte";
 
-    import { NODE_CATEGORIES, NODE_TYPES, actions, DRAGGING_BUTTON } from "./data.svelte.js";
+    import { actions, DRAGGING_BUTTON } from "./data.svelte.js";
+    import { NODE_CATEGORIES, NODE_TYPES } from "./nodes.svelte.js";
 
     let { selectedFile } = $props();
 

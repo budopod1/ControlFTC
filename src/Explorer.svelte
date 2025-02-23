@@ -18,6 +18,11 @@
         e.stopPropagation();
         state_.selectedFileID = file?.id;
     }
+
+    function handleTrashClick(e, fileId) {
+        e.stopPropagation();
+        actions.deleteFile(fileId);
+    }
 </script>
 
 <!-- svelte-ignore a11y_click_events_have_key_events -->
@@ -31,7 +36,7 @@
         <button aria-label="new file" onclick={actions.addFile}>
             <i class="bi bi-file-earmark-plus"></i>
         </button>
-        <button aria-label="manage opmodes">
+        <button aria-label="manage opmodes" onclick={actions.manageOpmodes}>
             <i class="bi bi-folder2"></i>
         </button>
     </div>
@@ -49,7 +54,7 @@
                     aria-label="file name">
                 <div class="file-actions">
                     <button aria-label="delete file"
-                        onmousedown={() => actions.deleteFile(file.id)}>
+                        onclick={(e) => handleTrashClick(e, file.id)}>
                         <i class="bi bi-trash"></i>
                     </button>
                 </div>
