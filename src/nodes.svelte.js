@@ -85,6 +85,26 @@ export const NODE_TYPES = [
         output: {type: DataType.Bool}
     },
     {
+        category: "Input",
+        name: "Get Data",
+        props: [
+            {
+                id: "value",
+                name: "Value",
+                type: "input",
+                inputType: "text",
+                value: ""
+            },
+            {
+                id: "type",
+                name: "Type",
+                type: "type",
+                value: DataType.Real
+            }
+        ],
+        output: {typeSource: "type"}
+    },
+    {
         category: "Math",
         name: "Number",
         props: [
@@ -591,6 +611,28 @@ export const NODE_TYPES = [
         inputs: [
             {id: "realPosition", type: DataType.Real, hideSource: "takeBool"},
             {id: "boolPosition", type: DataType.Bool, showSource: "takeBool"}
+        ]
+    },
+    {
+        category: "Ouput",
+        name: "Set Data",
+        props: [
+            {
+                id: "value",
+                name: "Value",
+                type: "input",
+                inputType: "text",
+                value: ""
+            },
+            {
+                id: "type",
+                name: "Type",
+                type: "type",
+                value: DataType.Real
+            }
+        ],
+        inputs: [
+            {id: "value", typeSource: "type"}
         ]
     }
 ];
