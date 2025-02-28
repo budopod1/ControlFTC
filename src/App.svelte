@@ -9,6 +9,7 @@
     import NewFileModal from "./NewFileModal.svelte";
     import ChooseButtonModal from "./ChooseButtonModal.svelte";
     import ChooseAxisModal from "./ChooseAxisModal.svelte";
+    import CompileOpmodeModal from "./CompileOpmodeModal.svelte";
 
     import { state_, actions, saveState } from "./data.svelte.js";
 
@@ -49,6 +50,7 @@
 <NewFileModal/>
 <ChooseButtonModal/>
 <ChooseAxisModal/>
+<CompileOpmodeModal/>
 
 <style>
     :global(#app) {

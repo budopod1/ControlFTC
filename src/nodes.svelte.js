@@ -89,8 +89,8 @@ export const NODE_TYPES = [
         name: "Get Data",
         props: [
             {
-                id: "value",
-                name: "Value",
+                id: "name",
+                name: "Name",
                 type: "input",
                 inputType: "text",
                 value: ""
@@ -618,8 +618,8 @@ export const NODE_TYPES = [
         name: "Set Data",
         props: [
             {
-                id: "value",
-                name: "Value",
+                id: "name",
+                name: "Name",
                 type: "input",
                 inputType: "text",
                 value: ""

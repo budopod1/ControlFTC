@@ -1,11 +1,17 @@
+<script>
+    import { actions, state_ } from "./data.svelte.js";
+
+    function doCompile() {
+        actions.compileOpmode(state_.opmode);
+    }
+</script>
+
 <div class="header-bar">
     <h1>
         ControlFTC
     </h1>
     <div class="header-tools">
-        <button class="btn">Btn 1</button>
-        <button class="btn">Btn 2</button>
-        <button class="btn">Btn 3</button>
+        <button class="btn" onclick={doCompile}>Compile</button>
     </div>
 </div>
 

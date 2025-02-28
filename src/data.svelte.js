@@ -92,11 +92,68 @@ $
 `.trimStart().replaceAll("$", "    ");
 
 
+const INIT_LOCATION = "// INIT";
+const LOOP_LOCATION = "// LOOP";
+
+
 export class TemplateFile extends FileBase {
     text = $state(DEFAULT_TEMPLATE_TEXT);
 
     constructor() {
         super("Template", FileType.Template);
+    }
+
+    errorOutput(error) {
+        return `/*
+ * ERROR while compiling template:
+ * ${error}
+ */
+`;
+    }
+
+    indentToMatch(txt, src, pos) {
+        let upTo = src.slice(0, pos);
+        let indent = "";
+        for (let i = upTo.length - 1; i >= 0; i--) {
+            if (src[i] == " ") {
+                indent += " ";
+            } else {
+                break;
+            }
+        }
+        return txt.replaceAll("\n", "\n" + indent).trim();
+    }
+
+    compile(opmode) {
+        let initInsert = `
+ElapsedTime runtime = new ElapsedTime();
+double lastFrameTime = 0;
+`;
+        let loopInsert = `
+double currentTime = runtime.time();
+double deltaTime = currentTime - lastFrameTime;
+lastFrameTime = currentTime;
+
+for (Updatee updatee : updatees) {
+    updatee.update(deltaTime);
+}
+        `.trim();
+
+        // TODO: actually do the main compilation here
+
+        let initIdx = this.text.indexOf(INIT_LOCATION);
+        if (initIdx == -1) {
+            return this.errorOutput(`Initiation location not found in template, please specify it with '${INIT_LOCATION}'`);
+        }
+
+        let loopIdx = this.text.indexOf(LOOP_LOCATION);
+        if (loopIdx == -1) {
+            return this.errorOutput(`Loop location not found in template, please specify it with '${LOOP_LOCATION}'`);
+        }
+
+        return this.text
+            .replace(INIT_LOCATION, this.indentToMatch(initInsert, this.text, initIdx))
+            .replace(LOOP_LOCATION, this.indentToMatch(loopInsert, this.text, loopIdx));
     }
 
     toJSON() {
@@ -318,5 +375,5 @@ export let allOpmodes = $state([]);
 export let state_ = $state({opmode: null, selectedFileID: null});
 export let actions = $state({
     manageOpmodes: null, addFile: null, deleteFile: null, setNextNode: null,
-    chooseButton: null, chooseAxis: null
+    chooseButton: null, chooseAxis: null, compileOpmode: null
 });

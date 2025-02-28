@@ -51,6 +51,12 @@ h2 {
     font-style: normal;
 }
 
+hr {
+    border: none;
+    border-top: solid var(--border-size) var(--border-color);
+    margin: var(--container-padding) 0;
+}
+
 .center {
     display: flex;
     justify-content: center;
