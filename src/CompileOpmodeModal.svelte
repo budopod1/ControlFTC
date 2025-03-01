@@ -12,6 +12,8 @@
 
     let openModal = $state();
 
+    let isModalOpen = $state(false);
+
     let opmode = $state(null);
 
     let templateFiles = $derived(opmode?.files?.filter(
@@ -20,10 +22,7 @@
 
     let currentTemplate = $state(null);
 
-    let compilationResult = $derived.by(() => {
-        if (!currentTemplate || !opmode) return "";
-        return currentTemplate.compile(opmode);
-    });
+    let compilationResult = $state("");
 
     let resultParent;
 
@@ -63,6 +62,12 @@
     });
 
     $effect(() => {
+        if (!isModalOpen) return;
+        compilationResult = currentTemplate && opmode
+            ? currentTemplate.compile(opmode) : ""
+    });
+
+    $effect(() => {
         if (templateFiles == null) {
             return;
         } else if (templateFiles.length == 0) {
@@ -74,7 +79,9 @@
 
     actions.compileOpmode = (opmodeToCompile) => {
         opmode = opmodeToCompile;
-        openModal();
+        opmode.doCleanupWork();
+        isModalOpen = true;
+        openModal().finally(() => isModalOpen = false);
     };
 
     let copyPrompt = $state(null);

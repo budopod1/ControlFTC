@@ -54,6 +54,17 @@ export function joystickToAxis(stick, axis) {
 }
 
 
+export function dataTypeToJava(dataType) {
+    if (dataType == DataType.Bool) {
+        return "Boolean";
+    } else if (dataType == DataType.Real) {
+        return "Double";
+    }
+
+    return null;
+}
+
+
 export class FileBase {
     name = $state();
 
@@ -71,6 +82,8 @@ export class FileBase {
             type: this.type,
         };
     }
+
+    doCleanupWork() {}
 
     loadFromJSON(_json) {}
 
@@ -92,8 +105,8 @@ $
 `.trimStart().replaceAll("$", "    ");
 
 
-const INIT_LOCATION = "// INIT";
-const LOOP_LOCATION = "// LOOP";
+const INIT_LOCATION = "// INIT\n";
+const LOOP_LOCATION = "// LOOP\n";
 
 
 export class TemplateFile extends FileBase {
@@ -103,12 +116,8 @@ export class TemplateFile extends FileBase {
         super("Template", FileType.Template);
     }
 
-    errorOutput(error) {
-        return `/*
- * ERROR while compiling template:
- * ${error}
- */
-`;
+    static compileError(error) {
+        throw {isCompileError: true, message: error};
     }
 
     indentToMatch(txt, src, pos) {
@@ -121,14 +130,17 @@ export class TemplateFile extends FileBase {
                 break;
             }
         }
-        return txt.replaceAll("\n", "\n" + indent).trim();
+        let result = txt.replaceAll(/\n(?=.)/g, "\n" + indent);
+        while (result.endsWith(" ")) result = result.slice(3)
+        return result;
     }
 
-    compile(opmode) {
+    _compile(opmode) {
         let initInsert = `
 ElapsedTime runtime = new ElapsedTime();
 double lastFrameTime = 0;
-`;
+
+`.trimStart();
         let loopInsert = `
 double currentTime = runtime.time();
 double deltaTime = currentTime - lastFrameTime;
@@ -137,23 +149,48 @@ lastFrameTime = currentTime;
 for (Updatee updatee : updatees) {
     updatee.update(deltaTime);
 }
-        `.trim();
+`.trimStart();
 
-        // TODO: actually do the main compilation here
+        let allUpdatees = [];
+
+        let subsystems = opmode.files.filter(
+            file => file.type == FileType.Subsystem);
+        for (let subsystem of subsystems) {
+            let {subsystemInit, subsystemUpdatees} = subsystem.compile();
+            initInsert += subsystemInit + "\n";
+            allUpdatees.push(...subsystemUpdatees);
+        }
+
+        initInsert += `Updatee[] updatees = {${allUpdatees.join(", ")}};\n`;
 
         let initIdx = this.text.indexOf(INIT_LOCATION);
         if (initIdx == -1) {
-            return this.errorOutput(`Initiation location not found in template, please specify it with '${INIT_LOCATION}'`);
+            TemplateFile.compileError(
+                `Initiation location not found in template, please specify it with '${INIT_LOCATION}'`);
         }
 
         let loopIdx = this.text.indexOf(LOOP_LOCATION);
         if (loopIdx == -1) {
-            return this.errorOutput(`Loop location not found in template, please specify it with '${LOOP_LOCATION}'`);
+            TemplateFile.compileError(
+                `Loop location not found in template, please specify it with '${LOOP_LOCATION}'`);
         }
 
         return this.text
             .replace(INIT_LOCATION, this.indentToMatch(initInsert, this.text, initIdx))
             .replace(LOOP_LOCATION, this.indentToMatch(loopInsert, this.text, loopIdx));
+    }
+
+    compile(opmode) {
+        try {
+            return this._compile(opmode);
+        } catch (e) {
+            if (!e.isCompileError) throw e;
+            return `/*
+* ERROR while compiling template:
+* ${e.message}
+*/
+`;
+        }
     }
 
     toJSON() {
@@ -261,6 +298,23 @@ export class SubsystemFile extends FileBase {
         }
     }
 
+    doCleanupWork() {
+        for (let node of this.nodes) {
+            node.outputConnections = node.outputConnections.filter(
+                connEnd => {
+                    let endNode = this.getNodeById(connEnd.node);
+                    if (!endNode) return false;
+                    let startType = getPortType(node, node.data.output);
+                    let endNodeInputs = getNodeInputs(endNode.data);
+                    if (connEnd.port >= endNodeInputs.length) return false;
+                    let endPort = endNodeInputs[connEnd.port]
+                    let endType = getPortType(endNode.data, endPort);
+                    return startType == endType;
+                }
+            );
+        }
+    }
+
     getConnectionTo(nodeId, portIdx) {
         for (let startNode of this.nodes) {
             for (let connEnd of startNode.outputConnections) {
@@ -270,6 +324,152 @@ export class SubsystemFile extends FileBase {
             }
         }
         return null;
+    }
+
+    compileError(error) {
+        TemplateFile.compileError(`In ${this.name}: ${error}`)
+    }
+
+    verifyNodeLegality(node) {
+        let nodeInputCount = getNodeInputs(node.data).length;
+        for (let i = 0; i < nodeInputCount; i++) {
+            if (this.getConnectionTo(node.id, i) == null) {
+                this.compileError("Nothing connected to node input");
+            }
+        }
+    }
+
+    formatPropValue(propValue, substitution) {
+        switch (substitution.format) {
+        case "button":
+        case "axis":
+        case "raw":
+            return propValue;
+        case "str":
+            return JSON.stringify(propValue.toString());
+        case "num":
+            return (+propValue).toString();
+        case "bool":
+            return propValue ? "true" : "false";
+        case "map":
+            return substitution.mapping[propValue];
+        case "type":
+            return dataTypeToJava(propValue) || "unknown type"
+        default:
+            return "unknown prop substitution format";
+        }
+    }
+
+    formatOperand(node, substitution, nodeMappings) {
+        switch (substitution.format) {
+        case "operand": {
+            let operandIdx = getNodeInputs(node.data)
+                .findIndex(input => input.id == substitution.fromInput);
+            let connection = this.getConnectionTo(node.id, operandIdx);
+            return nodeMappings.get(connection.startNode.id);
+        }
+        
+        case "optionalOperand": {
+            let operandIdx = getNodeInputs(node.data)
+                .findIndex(input => input.id == substitution.fromInput);
+            if (operandIdx == -1) return substitution.otherwise;
+            let connection = this.getConnectionTo(node.id, operandIdx);
+            return nodeMappings.get(connection.startNode.id);
+        }
+        
+        case "operandArray": {
+            let operands = [];
+            let nodeInputs = getNodeInputs(node.data);
+
+            for (let i = 0; i < nodeInputs.length; i++) {
+                let input = nodeInputs[i];
+                if (input.id == substitution.fromInput) {
+                    let connection = this.getConnectionTo(node.id, i);
+                    operands.push(nodeMappings.get(connection.startNode.id));
+                }
+            }
+
+            let rawInputData = node.data.inputs
+                .find(input => input.id == substitution.fromInput);
+            let type = dataTypeToJava(getPortType(node.data, rawInputData));
+
+            return `new ProviderNode<${type}>[] {${operands.join(", ")}}`
+        }
+        
+        default:
+            return "unknown operand substitution format";
+        }
+    }
+
+    compileNode(node, nodeMappings) {
+        let compileTo = node.data.compileTo;
+        let result = compileTo.template;
+        
+        let i = -1;
+        for (let sub of compileTo.subs) {
+            i++;
+            let formatted = "invalid substitution";
+            if (sub.fromProp) {
+                formatted = this.formatPropValue(
+                    getNodeProp(node.data, sub.fromProp).value, sub
+                );
+            } else if (sub.fromInput) {
+                formatted = this.formatOperand(
+                    node, sub, nodeMappings
+                );
+            }
+            result = result.replace("$"+i, formatted);
+        }
+        
+        return result;
+    }
+
+    compile() {
+        for (let node of this.nodes) {
+            this.verifyNodeLegality(node);
+        }
+
+        // https://en.wikipedia.org/wiki/Topological_sorting#Kahn%27s_algorithm
+        let sortedNodes = [];
+        let removedEdges = new Map();
+        let noIncomingEdgesNodes = this.nodes
+            .filter(node => getNodeInputs(node.data).length == 0);
+        
+        while (noIncomingEdgesNodes.length > 0) {
+            let node = noIncomingEdgesNodes.pop();
+
+            if (sortedNodes.includes(node)) {
+                this.compileError("there is at least one cycle");
+            }
+            
+            sortedNodes.push(node);
+            
+            for (let connEnd of node.outputConnections) {
+                let endNode = this.getNodeById(connEnd.node);
+
+                let endNodeRemovedEdges = removedEdges.get(endNode.id) || 0;
+                endNodeRemovedEdges++;
+                removedEdges.set(endNode.id, endNodeRemovedEdges);
+
+                if (endNodeRemovedEdges == getNodeInputs(endNode.data).length) {
+                    noIncomingEdgesNodes.push(endNode);
+                }
+            }
+        }
+
+        let subsystemInit = "";
+
+        let nodeMappings = new Map();
+
+        for (let node of sortedNodes) {
+            let name = "n"+node.id.toString().replace("0.", "");
+            let expression = this.compileNode(node, nodeMappings);
+            let type = expression.match(/^new (\w+(?:<[\w, ]+>)?)\(/)[1];
+            nodeMappings.set(node.id, name);
+            subsystemInit += `${type} ${name} = ${expression};\n`;
+        }
+
+        return {subsystemInit, subsystemUpdatees: nodeMappings.values()};
     }
 
     loadFromJSON(json) {
@@ -295,6 +495,12 @@ export class OpMode {
                 file => file.toJSON()
             ))
         };
+    }
+
+    doCleanupWork() {
+        for (let file of this.files) {
+            file.doCleanupWork();
+        }
     }
 
     static fromJSON(json) {
