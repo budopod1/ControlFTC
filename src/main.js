@@ -1,3 +1,14 @@
+if (typeof Promise.withResolvers == 'undefined') {
+    Promise.withResolvers = () => {
+        let resolve, reject;
+        let promise = new Promise((res, rej) => {
+            resolve = res;
+            reject = rej;
+        });
+        return {promise, resolve, reject};
+    }
+}
+
 import { mount } from "svelte";
 import "./app.css";
 
