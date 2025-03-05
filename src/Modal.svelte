@@ -1,5 +1,5 @@
 <script>
-    let { openModal = $bindable(), closeModal = $bindable(), title, children, footer } = $props();
+    let { openModal = $bindable(), closeModal = $bindable(), title, dialogClass = $bindable(""), children, footer } = $props();
 
     let dialog;
     let resolvePromise = null;
@@ -35,7 +35,7 @@
     }
 </script>
 
-<dialog bind:this={dialog} onclose={onDialogClose}>
+<dialog bind:this={dialog} onclose={onDialogClose} class={dialogClass}>
     <form method="dialog" class="dialog-form" onsubmit={onFormSubmit}>
         <div class="dialog-header">
             <div class="dialog-header-title">

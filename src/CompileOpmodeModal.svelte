@@ -93,7 +93,8 @@
     }
 </script>
 
-<Modal title={opmode ? "Compile "+opmode.name : ""} bind:openModal>
+<Modal title={opmode ? "Compile "+opmode.name : ""} bind:openModal
+    dialogClass="compile-modal">
     <div class="compile-body">
         <div class="compile-options">
             <div class="compile-option">
@@ -129,11 +130,27 @@
 </Modal>
 
 <style>
-    .compile-body {
-        width: 85vw;
-        height: 80vh;
+    :global .compile-modal {
+        width: 95vw;
+        height: 90vh;
+    }
+
+    :global .compile-modal > form {
+        height: 100%;
         display: flex;
         flex-direction: column;
+    }
+
+    :global .compile-modal > form > .dialog-body {
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    .compile-body {
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
     }
 
     .compile-result {
