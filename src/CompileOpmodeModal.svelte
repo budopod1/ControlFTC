@@ -144,10 +144,12 @@
     :global .compile-modal > form > .dialog-body {
         display: flex;
         flex-direction: column;
+        flex-grow: 1;
         overflow: hidden;
     }
 
     .compile-body {
+        flex-grow: 1;
         display: flex;
         flex-direction: column;
         overflow: hidden;
