@@ -98,6 +98,13 @@ export class FileBase {
 }
 
 
+class CompileError extends Error {
+    constructor(message) {
+        super(message);
+    }
+}
+
+
 const DEFAULT_TEMPLATE_TEXT = `
 public class ClassName {
 $
@@ -116,8 +123,8 @@ export class TemplateFile extends FileBase {
         super("Template", FileType.Template);
     }
 
-    static compileError(error) {
-        throw {isCompileError: true, message: error};
+    static compileError(msg) {
+        throw new CompileError(msg);
     }
 
     indentToMatch(txt, src, pos) {
@@ -184,7 +191,7 @@ for (Updatee updatee : updatees) {
         try {
             return this._compile(opmode);
         } catch (e) {
-            if (!e.isCompileError) throw e;
+            if (!(e instanceof CompileError)) throw e;
             return `/*
 * ERROR while compiling template:
 * ${e.message}

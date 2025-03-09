@@ -64,7 +64,7 @@
     $effect(() => {
         if (!isModalOpen) return;
         compilationResult = currentTemplate && opmode
-            ? currentTemplate.compile(opmode) : ""
+            ? currentTemplate.compile(opmode) : "";
     });
 
     $effect(() => {
